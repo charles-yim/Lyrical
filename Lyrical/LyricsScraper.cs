@@ -3,6 +3,7 @@ using Jil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
@@ -102,15 +103,18 @@ namespace Lyrical
                     {
                         //Get the lyrics url from search
                         HtmlAgilityPack.HtmlDocument htmlDocument = new HtmlWeb().Load("https://www.kkbox.com/hk/en/search.php?word=" + query);
+                        Console.WriteLine("1");
+
                         HtmlAgilityPack.HtmlNode node = htmlDocument.DocumentNode.SelectSingleNode("/html[1]/body[1]/script[28]");
                         string lyricsUrl = new Regex("web_full_url\":\"(.*?)\\?").Matches(node.InnerText)[index].Groups[1].Value.Replace("\\", "");
-
+                        Console.WriteLine("2");
+                        Console.WriteLine(lyricsUrl);
                         //Get the lyrics
                         htmlDocument = new HtmlWeb().Load(lyricsUrl);
-                        node = htmlDocument.DocumentNode.SelectSingleNode("/html[1]/head[1]/script[15]");
-                        dynamic jsonResponse = JSON.DeserializeDynamic(node.InnerText);
-                        Console.WriteLine(jsonResponse);
-                        string unformatedLyrics = jsonResponse.recordingOf.lyrics.text;
+                        Console.WriteLine("3");
+                        node = htmlDocument.DocumentNode.SelectSingleNode("//p[@class='lyrics'][1]");
+                        Console.WriteLine("4");
+                        string unformatedLyrics = WebUtility.HtmlDecode(node.InnerText).Trim();
                         lyrics = Regex.Replace(unformatedLyrics, @"\r\n?|\n", System.Environment.NewLine);
                         return lyrics;
                     }
